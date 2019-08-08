@@ -8811,7 +8811,15 @@ function adoptClassInstance(workInProgress, instance) {
     instance._reactInternalInstance = fakeInternalInstance;
   }
 }
-
+//add by lynnfang
+    var upperThresholdTime = 20;
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+var performanceNow = _interopDefault(require('fbjs/lib/performanceNow'));
+var measureTiming = function measureTiming(start) {
+  return (performanceNow() - start).toFixed(5);
+};
+var notAnalyzeClass = ['HorizontalLayout','VerticalLayout','Foo','DefaultHeader','DefaultContent','AccordionSubItem','AccordionItem','Accordion','DatePicker','StaticContainer','StyledComponent','StyleProvider', ' viewName', 'AnimatedComponent', 'Surface', 'Group', 'ClippingRectangle', 'Shape', 'Text', 'WebSocketImage', 'Button', 'StaticRenderer', 'CheckBox', 'DummyDatePickerIOS', 'DatePickerIOS', 'DrawerLayoutAndroid', 'KeyboardAvoidingView', 'MyMaskedView', 'MaskedViewIOS', 'PickerItem', 'Picker', 'PickerAndroid', 'PickerIOS', 'DummyProgressViewIOS', 'RefreshControl', 'RefreshControlMock', 'SafeAreaView', 'ScrollView', 'ScrollViewStickyHeader', 'DummySegmentedControlIOS', 'SegmentedControlIOS', 'StatusBar', 'Switch', 'InputAccessoryView', 'ToolbarAndroid', 'DummyTouchableNativeFeedback', 'UnimplementedView', 'ViewPagerAndroid', 'WebView', 'Incremental', 'SlowWidget', 'IncrementalExample', 'IncrementalGroup', 'IncrementalPresenter', 'WindowedListView', 'CellRenderer', 'SwipeableFlatList<ItemT>', 'SwipeableListView', 'SwipeableQuickActionButton', 'SwipeableQuickActions', 'SwipeableRow', 'ImageBackground', 'BorderBox', 'BoxInspector', 'BoxContainer', 'ElementBox', 'ElementProperties', 'Inspector', 'InspectorOverlay', 'InspectorPanel', 'InspectorPanelButton', 'NetworkOverlay', 'PerformanceOverlay', 'StyleInspector', 'Widget', 'VirtualizedCellWrapper', 'ItemWithSeparator', 'InternalListViewType<Props>', 'ListViewMock', 'Modal', 'SnapshotViewIOS', 'AppContainer', 'ReactNativeComponent<Props>', 'TouchableText', 'MyView', 'YellowBox', ' YellowBox', 'YellowBoxInspector', 'YellowBoxInspectorSourceMapStatus', 'YellowBoxList', 'YellowBoxListRow', 'YellowBoxPressable', 'AnimatedTransformTestApp', 'CatalystRootViewTestApp', 'DatePickerDialogTestApp', 'ImageErrorTestApp', 'ImageOverlayColorTestApp', 'InitialPropsTestApp', 'JSResponderTestApp', 'LayoutEventsTestApp', 'MeasureLayoutTestApp', 'TouchTestApp', 'NativeIdTestApp', 'PickerAndroidTestApp', 'ProgressBarSampleApp', 'Item', 'ScrollViewTestApp', 'HorizontalScrollViewTestApp', 'ShareTestApp', 'ClippingSample1', 'ClippingSample2', 'UpdatingSample1', 'UpdatingSample2', 'ScrollViewTest', 'SubviewsClippingTestApp', 'Row', 'SwipeRefreshLayoutTestApp', 'TestIdTestApp', 'TokenizedTextExample', 'TextInputTestApp', 'TimePickerDialogTestApp', 'TouchBubblingTestApp', 'FlexTestApp', 'FlexWithText', 'AbsolutePositionTestApp', 'AbsolutePositionBottomRightTestApp', 'CenteredTextView', 'UpdatePositionInListTestApp', 'ViewSampleApp', 'MarginSampleApp', 'BorderSampleApp', 'TransformSampleApp', 'VibrancyView', 'NavigatorBreadcrumbNavigationBar', 'NavigatorNavigationBar', 'ImageLoad', 'withOrientation', 'TabBar<T:*>', 'TabViewAnimated<T:*>', 'TabViewPagerAndroid<T:*>', 'TabViewPagerExperimental<T:*>', 'TabViewPagerPan<T:*>', 'TabViewPagerScroll<T:*>', 'TouchableItem', 'TouchableTextGradient', 'NavigationContainer', 'Navigator', 'FooView', 'BarView', 'BazView', 'FooNavigator', ' BarScreen', ' BazScreen', 'Transitioner', 'ComponentWithNavigation', 'ComponentWithNavigationFocus', 'Card', 'CardStack', 'CardStackTransitioner', 'Container', 'SwitchContainer', 'LottieView', 'NavigatorTransitionerIOS', 'DummyTabBarIOS', 'TabBarIOS', 'DummyTab', 'TabBarItemIOS', 'WKWebView', 'TypedSwipeableRow', 'MetroListView', 'ThemeProvider', 'ThemedComponent', 'Component', 'Input', 'SearchBar', 'Footer', 'HomeSplash', 'Index', 'VersionItem', 'Versions', 'Handler', 'UnimplementedGestureHandler', 'NativeViewGestureHandler', 'TapGestureHandler', 'ForceTouchFallback', 'ComponentWrapper', 'BaseButton', 'RectButton', 'BorderlessButton', 'RNGestureHandlerButton', 'Wrapper', 'DemoScreen', 'SwipeRatingScreen', 'Camera', 'Speech', 'Audio', 'Video', 'BlurView', 'AdIconViewChild', 'AdIconView', 'MediaViewChild', 'MediaView', 'TriggerableViewChild', 'TriggerableView', 'NativeAdWrapper', 'AppLoading', 'ExpoRootComponent', 'RootErrorBoundary', 'TestComponent', 'ChildComponent', 'Screen', 'ScreenContainer', 'PagerAndroid<T:*>', 'PagerExperimental<T:*>', 'PagerPan<T:*>', 'PagerScroll<T:*>', 'TabView<T:*>', 'KeyboardAwareNavigator', 'NavigationEvents', 'SwitchView', 'BlankScreen', 'RootScreen', 'StackView', 'StackViewLayout', 'BottomNavigationView', 'NavigationView', 'EnhancedComponent', 'TouchableWithoutFeedbackWrapper', 'TabBarBottom', 'TabBarIcon', 'ResourceSavingScene', 'Area', 'VictoryArea', 'VictoryAxis', 'Bar', 'VictoryBar', 'VictoryBoxPlot', 'VictoryBrushLine', 'Candle', 'VictoryCandlestick', 'VictoryChart', 'VictoryAnimation', 'VictoryClipContainer', 'VictoryContainer', 'VictoryLabel', 'Portal', 'VictoryPortal', 'Arc', 'Border', 'Circle', 'ClipPath', 'LineSegment', 'Line', 'Path', 'Point', 'Rect', 'TSpan', 'Whisker', 'VictoryTransition', 'ErrorBar', 'VictoryErrorBar', 'VictoryGroup', 'VictoryLegend', 'Curve', 'VictoryLine', 'VCircle', 'VClipPath', 'VLine', 'VPath', 'VRect', 'VText', 'VTSpan', 'Slice', 'VictoryPie', 'VictoryPolarAxis', 'VictoryScatter', 'VictorySharedEvents', 'VictoryStack', 'Flyout', 'VictoryTooltip', 'VictoryVoronoi', 'Voronoi', ' Foo', 'DraggableView', 'ScreenReaderStatusExample', ' },});PickerIOS.Item', 'ScrollViewMock', 'TabViewAnimated<T:Route<*>>', 'TabViewPagerAndroid<T:Route<*>>', 'TabViewPagerPan<T:Route<*>>', 'TabViewPagerScroll<T:Route<*>>','a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H','I','J','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z', ' ','','_'];
+/////////////
 function constructClassInstance(
   workInProgress,
   ctor,
@@ -8860,8 +8868,42 @@ function constructClassInstance(
       new ctor(props, context); // eslint-disable-line no-new
     }
   }
-
+  //add by lynnfang
+  var constructStart = performanceNow();
+  /////
   var instance = new ctor(props, context);
+  //add by lynnfang//
+  var constructStartTiming = measureTiming(constructStart);
+  if(notAnalyzeClass.indexOf(instance.constructor.name) == -1)
+  {
+    if(upperThresholdTime<constructStartTiming){
+      warningWithoutStack$1(false, "function " + instance.constructor.name + ".constructor:running complete time is:" + constructStartTiming + ",>20");
+    }
+    Object.keys(instance).forEach(function(member){
+      if(typeof(instance[member]) == 'function') {
+        var fn = instance[member];
+        instance[member] = function () {
+          for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+            args[_key] = arguments[_key];
+          }
+          var start = performanceNow();
+          var result = fn.call.apply(fn, [instance].concat(args));
+          var timing = measureTiming(start);
+          //yellow warning
+          if (timing > 0 && timing > upperThresholdTime) {
+              warningWithoutStack$1(false, "function " + instance.constructor.name + "." + member + ":running complete time is:" + constructStartTiming + ",>20");
+          }
+          if (result && result.then) {
+            return result.then(function (res) {
+              return res;
+            });
+          }
+          return result;
+        }
+      }
+    });
+  }
+  ////
   var state = (workInProgress.memoizedState =
     instance.state !== null && instance.state !== undefined
       ? instance.state
