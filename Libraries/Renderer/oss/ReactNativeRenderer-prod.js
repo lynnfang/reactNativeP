@@ -60,6 +60,58 @@ var hasError = !1,
       caughtError = error;
     }
   };
+//add by lynnfang
+const ENABLEPROFILER = true;
+var commitTime = 0;
+var profilerStartTime = -1;
+var hasNativePerformanceNow =
+  typeof performance === "object" && typeof performance.now === "function";
+var now$$1 = hasNativePerformanceNow
+  ? function() {
+    return performance.now();
+  }
+  : function() {
+    return Date.now();
+  };
+function getCommitTime() {
+  return commitTime;
+}
+function recordCommitTime() {
+  if (!ENABLEPROFILER) {
+    return;
+  }
+  commitTime = now$$1();
+}
+function startProfilerTimer(fiber){
+  if(!ENABLEPROFILER){
+    return;
+  }
+  profilerStartTime = now$$1();
+  if (fiber.actualStartTime < 0) {
+    fiber.actualStartTime = now$$1();
+  }
+}
+function stopProfilerTimerIfRunning(fiber) {
+  if (!ENABLEPROFILER) {
+    return;
+  }
+  profilerStartTime = -1;
+}
+function stopProfilerTimerIfRunningAndRecordDelta(fiber, overrideBaseTime) {
+  if (!ENABLEPROFILER) {
+    return;
+  }
+
+  if (profilerStartTime >= 0) {
+    var elapsedTime = now$$1() - profilerStartTime;
+    fiber.actualDuration += elapsedTime;
+    if (overrideBaseTime) {
+      fiber.selfBaseDuration = elapsedTime;
+    }
+    profilerStartTime = -1;
+  }
+}
+///////////////////////////////////////
 function invokeGuardedCallback(name, func, context, a, b, c, d, e, f) {
   hasError = !1;
   caughtError = null;
@@ -1803,6 +1855,19 @@ function FiberNode(tag, pendingProps, key, mode) {
   this.lastEffect = this.firstEffect = this.nextEffect = null;
   this.childExpirationTime = this.expirationTime = 0;
   this.alternate = null;
+  ////add by lynnfang
+  if(ENABLEPROFILER){
+    this.actualDuration = Number.NaN;
+    this.actualStartTime = Number.NaN;
+    this.selfBaseDuration = Number.NaN;
+    this.treeBaseDuration = Number.NaN;
+
+    this.actualDuration = 0;
+    this.actualStartTime = -1;
+    this.selfBaseDuration = 0;
+    this.treeBaseDuration = 0;
+  }
+  /////////////////////////////////////
 }
 function createFiber(tag, pendingProps, key, mode) {
   return new FiberNode(tag, pendingProps, key, mode);
@@ -1840,6 +1905,12 @@ function createWorkInProgress(current, pendingProps) {
       (workInProgress.nextEffect = null),
       (workInProgress.firstEffect = null),
       (workInProgress.lastEffect = null));
+  //add by lynnfang
+  if (null !== workInProgress&&ENABLEPROFILER) {
+    workInProgress.actualDuration = 0;
+    workInProgress.actualStartTime = -1;
+  }
+  /////////////////////////////////
   workInProgress.childExpirationTime = current.childExpirationTime;
   workInProgress.expirationTime = current.expirationTime;
   workInProgress.child = current.child;
@@ -1850,6 +1921,12 @@ function createWorkInProgress(current, pendingProps) {
   workInProgress.sibling = current.sibling;
   workInProgress.index = current.index;
   workInProgress.ref = current.ref;
+  ///add by lynnfang
+  if (ENABLEPROFILER) {
+    workInProgress.selfBaseDuration = current.selfBaseDuration;
+    workInProgress.treeBaseDuration = current.treeBaseDuration;
+  }
+  /////////////////////////////////////
   return workInProgress;
 }
 function createFiberFromTypeAndProps(
@@ -3750,6 +3827,13 @@ function finishClassComponent(
     );
   shouldUpdate = workInProgress.stateNode;
   ReactCurrentOwner$3.current = workInProgress;
+  //add by lynnfang
+  if(didCaptureError && "function" !== typeof Component.getDerivedStateFromError){
+    if (ENABLEPROFILER) {
+      stopProfilerTimerIfRunning(workInProgress);
+    }
+  }
+  ///////////////////////////////////////////////////
   var nextChildren =
     didCaptureError && "function" !== typeof Component.getDerivedStateFromError
       ? null
@@ -3893,6 +3977,11 @@ function bailoutOnAlreadyFinishedWork(
 ) {
   null !== current$$1 &&
     (workInProgress.firstContextDependency = current$$1.firstContextDependency);
+  //add by lynnfang
+  if (ENABLEPROFILER) {
+    stopProfilerTimerIfRunning(workInProgress);
+  }
+  /////////////////////////
   if (workInProgress.childExpirationTime < renderExpirationTime) return null;
   invariant(
     null === current$$1 || workInProgress.child === current$$1.child,
@@ -3950,6 +4039,13 @@ function beginWork(current$$1, workInProgress, renderExpirationTime) {
       case 10:
         pushProvider(workInProgress, workInProgress.memoizedProps.value);
         break;
+      //add by lynnfang
+      case 12:
+        if(ENABLEPROFILER){
+          workInProgress.effectTag |= 4;
+        }
+        break;
+      /////////////////////
       case 13:
         if (null !== workInProgress.memoizedState) {
           updateExpirationTime = workInProgress.child.childExpirationTime;
@@ -4252,6 +4348,11 @@ function beginWork(current$$1, workInProgress, renderExpirationTime) {
         workInProgress.child
       );
     case 12:
+      //add by lynnfang
+      if(ENABLEPROFILER){
+        workInProgress.effectTag |= 4;
+      }
+      /////////////////////
       return (
         reconcileChildren(
           current$$1,
@@ -5104,6 +5205,13 @@ function completeUnitOfWork(workInProgress) {
       siblingFiber = workInProgress.sibling;
     if (0 === (workInProgress.effectTag & 1024)) {
       nextUnitOfWork = workInProgress;
+      ///add by lynnfang
+      if(ENABLEPROFILER){
+        if (workInProgress.mode&4) {
+          startProfilerTimer(workInProgress);
+        }
+      }
+      //////////////////////////////
       a: {
         var current = current$$1;
         current$$1 = workInProgress;
@@ -5271,23 +5379,59 @@ function completeUnitOfWork(workInProgress) {
         }
         nextUnitOfWork = null;
       }
+      ///add by lynnfang
+      if(ENABLEPROFILER){
+        if (workInProgress.mode&4) {
+          stopProfilerTimerIfRunningAndRecordDelta(workInProgress, false);
+        }
+      }
+      ///////////////////////////////////////////////
       current$$1 = workInProgress;
       if (
         1 === nextRenderExpirationTime ||
         1 !== current$$1.childExpirationTime
       ) {
         newProps = 0;
-        for (
-          renderExpirationTime = current$$1.child;
-          null !== renderExpirationTime;
+        ///add by lynnfang
+        if (ENABLEPROFILER && workInProgress.mode & 4) {
+          var actualDuration = workInProgress.actualDuration;
+          var treeBaseDuration = workInProgress.selfBaseDuration;
+          var shouldBubbleActualDurations =
+            workInProgress.alternate === null ||
+            workInProgress.child !== workInProgress.alternate.child;
+          for (
+            renderExpirationTime = current$$1.child;
+            null !== renderExpirationTime;
 
-        )
-          (type = renderExpirationTime.expirationTime),
-            (current = renderExpirationTime.childExpirationTime),
+          ){
+            (type = renderExpirationTime.expirationTime),
+              (current = renderExpirationTime.childExpirationTime),
             type > newProps && (newProps = type),
             current > newProps && (newProps = current),
-            (renderExpirationTime = renderExpirationTime.sibling);
-        current$$1.childExpirationTime = newProps;
+              (renderExpirationTime = renderExpirationTime.sibling);
+            if (shouldBubbleActualDurations) {
+              actualDuration += current$$1.child.actualDuration;
+            }
+            treeBaseDuration += current$$1.child.treeBaseDuration;
+          }
+          workInProgress.actualDuration = actualDuration;
+          workInProgress.treeBaseDuration = treeBaseDuration;
+          current$$1.childExpirationTime = newProps;
+        }
+        else{
+          for (
+            renderExpirationTime = current$$1.child;
+            null !== renderExpirationTime;
+
+          )
+            (type = renderExpirationTime.expirationTime),
+              (current = renderExpirationTime.childExpirationTime),
+            type > newProps && (newProps = type),
+            current > newProps && (newProps = current),
+              (renderExpirationTime = renderExpirationTime.sibling);
+          current$$1.childExpirationTime = newProps;
+        }
+        ////////////////////////
       }
       if (null !== nextUnitOfWork) return nextUnitOfWork;
       null !== returnFiber &&
@@ -5304,6 +5448,18 @@ function completeUnitOfWork(workInProgress) {
             : (returnFiber.firstEffect = workInProgress),
           (returnFiber.lastEffect = workInProgress)));
     } else {
+      //add by lynnfang
+      if (ENABLEPROFILER&&workInProgress.mode&4) {
+        stopProfilerTimerIfRunningAndRecordDelta(workInProgress, false);
+        var actualDuration = workInProgress.actualDuration;
+        var child = workInProgress.child;
+        while (child !== null) {
+          actualDuration += child.actualDuration;
+          child = child.sibling;
+        }
+        workInProgress.actualDuration = actualDuration;
+      }
+      ///////////////////////////////////////////
       workInProgress = unwindWork(workInProgress, nextRenderExpirationTime);
       if (null !== workInProgress)
         return (workInProgress.effectTag &= 1023), workInProgress;
@@ -5522,7 +5678,14 @@ function renderRoot(root$jscomp$0, isYieldy) {
   isWorking = !1;
   lastContextWithAllBitsObserved = lastContextDependency = currentlyRenderingFiber = ReactCurrentOwner$2.currentDispatcher = null;
   if (didFatal) (nextRoot = null), (root$jscomp$0.finishedWork = null);
-  else if (null !== nextUnitOfWork) root$jscomp$0.finishedWork = null;
+  else if (null !== nextUnitOfWork){
+    root$jscomp$0.finishedWork = null;
+    ///add by lynnfang
+    if (ENABLEPROFILER&& nextUnitOfWork.mode&4) {
+      stopProfilerTimerIfRunningAndRecordDelta(nextUnitOfWork, true);
+    }
+    ////////////////////////////////////
+  }
   else {
     didFatal = root$jscomp$0.current.alternate;
     invariant(
@@ -6084,6 +6247,11 @@ function completeRoot(root, finishedWork$jscomp$0, expirationTime) {
       captureCommitPhaseError(nextEffect, error),
       null !== nextEffect && (nextEffect = nextEffect.nextEffect));
   }
+  //add by lynnfang
+  if (ENABLEPROFILER) {
+    recordCommitTime();
+  }
+  ////////////////////
   for (nextEffect = firstBatch; null !== nextEffect; ) {
     current$$1 = !1;
     prevProps = void 0;
@@ -6211,6 +6379,33 @@ function completeRoot(root, finishedWork$jscomp$0, expirationTime) {
             case 4:
               break;
             case 12:
+              ///add by lynnfang
+              if (ENABLEPROFILER) {
+                var onRender = alternate.memoizedProps.onRender;
+                var ProfilerComponentNames = new Array();
+                if (alternate.firstEffect != null&&typeof alternate.firstEffect.type == "function" && !!(alternate.firstEffect.type.prototype && alternate.firstEffect.type.prototype.isReactComponent)){
+                  if (alternate.firstEffect.type != undefined && (alternate.firstEffect.type.name != undefined && alternate.firstEffect.type.name != ""))
+                    ProfilerComponentNames.push(alternate.firstEffect.type.name);
+                  var next = alternate.firstEffect.nextEffect;
+                  while(next != null&&typeof next.type == "function" && !!(next.type.prototype && next.type.prototype.isReactComponent)){
+                    if (next.type != null && next.type.name != undefined && next.type.name != null && next.type.name != ""){
+                      if(ProfilerComponentNames.indexOf(next.type.name) < 0)
+                        ProfilerComponentNames.push(next.type.name);
+                    }
+                    next = next.nextEffect;
+                  }
+                }
+                onRender(
+                  alternate.memoizedProps.id,
+                  current$$1$jscomp$1 === null ? "mount" : "update",
+                  alternate.actualDuration,
+                  alternate.treeBaseDuration,
+                  alternate.actualStartTime,
+                  getCommitTime(),
+                  ProfilerComponentNames
+                );
+              }
+              ///////////////////////////
               break;
             case 13:
               break;
@@ -6488,7 +6683,14 @@ var roots = new Map(),
     render: function(element, containerTag, callback) {
       var root = roots.get(containerTag);
       if (!root) {
-        root = createFiber(3, null, null, 0);
+        //add by lynnfang
+        if(ENABLEPROFILER){
+          root = createFiber(3, null, null, 0|4);
+        }
+        else {
+          /////////////////////////
+          root = createFiber(3, null, null, 0);
+        }
         var root$jscomp$0 = {
           current: root,
           containerInfo: containerTag,
