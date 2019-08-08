@@ -14099,7 +14099,20 @@ function commitLifeCycles(
     case Profiler: {
       if (enableProfilerTimer) {
         var onRender = finishedWork.memoizedProps.onRender;
-
+        var ProfilerComponentNames = new Array();
+        var first = finishedWork.firstEffect;
+        if (first != null&&typeof first.type == "function" && !!(first.type.prototype && first.type.prototype.isReactComponent)){
+          if (first.type != undefined && (first.type.name != undefined && first.type.name != ""))
+            ProfilerComponentNames.push(first.type.name);
+          var next = first.nextEffect;
+          while(next != null&&typeof next.type == "function" && !!(next.type.prototype && next.type.prototype.isReactComponent)){
+            if (next.type != null && next.type.name != undefined && next.type.name != null && next.type.name != ""){
+              if(ProfilerComponentNames.indexOf(next.type.name) < 0)
+                ProfilerComponentNames.push(next.type.name);
+            }
+            next = next.nextEffect;
+          }
+        }
         if (enableSchedulerTracing) {
           onRender(
             finishedWork.memoizedProps.id,
@@ -14108,6 +14121,7 @@ function commitLifeCycles(
             finishedWork.treeBaseDuration,
             finishedWork.actualStartTime,
             getCommitTime(),
+            ProfilerComponentNames,
             finishedRoot.memoizedInteractions
           );
         } else {
@@ -14117,7 +14131,8 @@ function commitLifeCycles(
             finishedWork.actualDuration,
             finishedWork.treeBaseDuration,
             finishedWork.actualStartTime,
-            getCommitTime()
+            getCommitTime(),
+            ProfilerComponentNames
           );
         }
       }
