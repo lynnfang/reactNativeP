@@ -5474,12 +5474,26 @@ function completeUnitOfWork(workInProgress) {
   return null;
 }
 function performUnitOfWork(workInProgress) {
+  //add by lynnfang
+  if(ENABLEPROFILER){
+    if(workInProgress.mode&4){
+      startProfilerTimer(workInProgress);
+    }
+  }
+  /////////////////////
   var next = beginWork(
     workInProgress.alternate,
     workInProgress,
     nextRenderExpirationTime
   );
   workInProgress.memoizedProps = workInProgress.pendingProps;
+  //add by lynnfang
+  if(ENABLEPROFILER){
+    if(workInProgress.mode&4){
+      stopProfilerTimerIfRunningAndRecordDelta(workInProgress, true);
+    }
+  }
+  ///////////////////
   null === next && (next = completeUnitOfWork(workInProgress));
   ReactCurrentOwner$2.current = null;
   return next;
