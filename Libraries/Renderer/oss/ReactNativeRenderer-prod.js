@@ -61,7 +61,7 @@ var hasError = !1,
     }
   };
 //add by lynnfang
-const ENABLEPROFILER = true;
+var ENABLEPROFILER = true;
 var commitTime = 0;
 var profilerStartTime = -1;
 var hasNativePerformanceNow =
@@ -6622,6 +6622,9 @@ _flushInteractiveUpdatesImpl = function() {
 };
 var roots = new Map(),
   ReactNativeRenderer = {
+    //add by lynnfang
+    ProfilerSwitch:false,
+    /////////
     NativeComponent: (function(findNodeHandle, findHostInstance) {
       return (function(_React$Component) {
         function ReactNativeComponent() {
@@ -6695,6 +6698,9 @@ var roots = new Map(),
     })(findNodeHandle, findHostInstance),
     findNodeHandle: findNodeHandle,
     render: function(element, containerTag, callback) {
+      //add by lynnfang
+      ENABLEPROFILER = this.ProfilerSwitch;
+      //
       var root = roots.get(containerTag);
       if (!root) {
         //add by lynnfang
