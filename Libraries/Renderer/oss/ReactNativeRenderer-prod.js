@@ -6401,10 +6401,12 @@ function completeRoot(root, finishedWork$jscomp$0, expirationTime) {
                   if (alternate.firstEffect.type != undefined && (alternate.firstEffect.type.name != undefined && alternate.firstEffect.type.name != ""))
                     ProfilerComponentNames.push(alternate.firstEffect.type.name);
                   var next = alternate.firstEffect.nextEffect;
-                  while(next != null&&typeof next.type == "function" && !!(next.type.prototype && next.type.prototype.isReactComponent)){
-                    if (next.type != null && next.type.name != undefined && next.type.name != null && next.type.name != ""){
-                      if(ProfilerComponentNames.indexOf(next.type.name) < 0)
-                        ProfilerComponentNames.push(next.type.name);
+                  while(next != null){
+                    if(typeof next.type == "function" && !!(next.type.prototype && next.type.prototype.isReactComponent)){
+                      if (next.type != null && next.type.name != undefined && next.type.name != null && next.type.name != ""){
+                        if(ProfilerComponentNames.indexOf(next.type.name) < 0)
+                          ProfilerComponentNames.push(next.type.name);
+                      }
                     }
                     next = next.nextEffect;
                   }

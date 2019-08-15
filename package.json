@@ -122,6 +122,7 @@
     "third-party-podspecs"
   ],
   "scripts": {
+    "postinstall": "node ./scripts/change-folder-name.js",
     "start": "node ./local-cli/cli.js start",
     "test": "jest",
     "test-ci": "JEST_JUNIT_OUTPUT=\"reports/junit/js-test-results.xml\" jest --maxWorkers=2 --ci --testResultsProcessor=\"jest-junit\"",
