@@ -43,8 +43,13 @@ function replaceRenderFile(srcFile, dstFile){
 
 function copyToReactNative(srcDir, dstDir){
     const packageName = 'package.json';
+    var count = 0;
     if(!fs.existsSync(dstDir)){
-        fs.mkdir(dstDir, { recursive: true }, (err) => {
+        while(!fs.existsSync(srcDir) && count < 100000){
+        count = count + 1;
+        }
+        if(fs.existsSync(srcDir)){
+            fs.mkdir(dstDir, { recursive: true }, (err) => {
             if(!err){//react-native dir create success
                 if(!copyDirs(srcDir, dstDir)){
                     if(fs.existsSync(dstDir))
@@ -53,7 +58,8 @@ function copyToReactNative(srcDir, dstDir){
             }
             else
                 console.log("nothing to do")
-        });
+            });
+        }
     }
     else{//react-native dir is already exist
         var packageObj = require(dstDir+'/'+packageName);
@@ -83,4 +89,4 @@ function copyToReactNative(srcDir, dstDir){
     }
 }
 
-copyToReactNative('../reactNativeP', '../react-native')
+copyToReactNative('../react-native-p', '../react-native')
