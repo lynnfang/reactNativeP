@@ -2,6 +2,8 @@
 
 var fs=require('fs');
 const path = require('path');
+const process = require('process');
+var currentPath = process.cwd();
 function copyDirs(srcDir, dstDir){
     var fileCount = 0;//统计所有的文件个数，写的个数应该跟读的个数一样
     fs.readdir(srcDir, function(err,paths){
@@ -42,6 +44,7 @@ function replaceRenderFile(srcFile, dstFile){
 }
 
 function copyToReactNative(srcDir, dstDir){
+    console.log(currentPath);
     const packageName = 'package.json';
     var count = 0;
     if(!fs.existsSync(dstDir)){
@@ -63,7 +66,7 @@ function copyToReactNative(srcDir, dstDir){
     }
     else{//react-native dir is already exist
         var packageObj = require(dstDir+'/'+packageName);
-        if(packageObj.name!=='@tencent/reactNativeP'){
+        if(packageObj.name!=='react-native-p'){
             if(packageObj.version.indexOf('0.57.8')>-1){
                 var renderFiles = ['/Libraries/Renderer/oss/ReactNativeRenderer-dev.js','/Libraries/Renderer/oss/ReactNativeRenderer-prod.js'];
                 renderFiles.forEach(function(eachRenderFile){
@@ -89,4 +92,4 @@ function copyToReactNative(srcDir, dstDir){
     }
 }
 
-copyToReactNative('../react-native-p', '../react-native')
+copyToReactNative(currentPath, currentPath + '/../react-native')
