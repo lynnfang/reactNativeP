@@ -44,7 +44,7 @@ function replaceRenderFile(srcFile, dstFile){
 }
 
 function copyToReactNative(srcDir, dstDir){
-    console.log(currentPath);
+    console.log("path:" + currentPath);
     const packageName = 'package.json';
     var count = 0;
     if(!fs.existsSync(dstDir)){
