@@ -225,7 +225,7 @@
     "react": "16.6.3",
     "react-native-dummy": "0.1.0",
     "react-test-renderer": "16.6.3",
-    "shelljs": "^0.7.8"
+    "shelljs": "^0.8.5"
   },
   "detox": {
     "test-runner": "jest",
